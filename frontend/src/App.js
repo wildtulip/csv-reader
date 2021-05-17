@@ -25,7 +25,7 @@ function App() {
       case 'licenseStates':
         return value.split('|').every(name => states.find(el => el.name === name || el.abbreviation === name))
       case 'expirationDate':
-        return moment(value.modelValue, ['YYYY-MM-DD', 'MM/DD/YYYY'], true).isValid() && moment(value).isAfter(new Date())
+        return moment(value, ['YYYY-MM-DD', 'MM/DD/YYYY'], true).isValid() && moment(value).isAfter(new Date())
       case 'phone':
         return (value.startsWith('+1') && value.length === 12) || (value.startsWith('1') && value.length === 11) || (value.length === 10)
       case 'hasChildren':
@@ -56,7 +56,8 @@ function App() {
             .trim()
             .split('|')
             .map(el => {
-              const state = states.find(el => el.name === el)
+              const state = states.find(state => state.name === el);
+              console.log(el);
               return state ? state.abbreviation : el
             })
             .join('|'), valid: ''
@@ -79,8 +80,11 @@ function App() {
     const isTableIncorrect = firstFiltration.find(el => {
       return el.phone.value === '' || el.email.value === '' || el.fullName.value === ''
     })
-    isTableIncorrect ? setModal(true) : setIsTableShow(true);
-    setTableData(firstFiltration);
+    if (data.length) {
+      isTableIncorrect ? setModal(true) : setIsTableShow(true);
+      setTableData(firstFiltration);
+    }
+
     console.log(isTableShow);
   }, [data])
 
@@ -97,11 +101,12 @@ function App() {
   }
   return (
     <div className="App">
-      <input type="file" accept=".csv" ref={fileInput} onChange={handleChange}></input>
+      <span className="attention">Note that you can only load <b>.csv</b> files!</span>
+      <input className="input" type="file" accept=".csv" ref={fileInput} onChange={handleChange}></input>
 
       {isTableShow ?
         <Table>
-          <thead>
+          <thead className="tableHead">
             <tr>
               <th>ID</th>
               <th>Full Name</th>
@@ -120,22 +125,42 @@ function App() {
           <tbody>
             {tableData.map((el, i) => <tr key={i}>
               <th>{el.id.value}</th>
-              <th className={clsx(el.fullName.valid ? 'green' : 'red')}>{el.fullName.value}</th>
-              <th className={clsx(el.phone.valid ? 'green' : 'red')}>{el.phone.value}</th>
-              <th className={clsx(el.email.valid ? 'green' : 'red')}>{el.email.value}</th>
-              <th className={clsx(el.age.valid ? 'green' : 'red')}>{el.age.value}</th>
-              <th className={clsx(el.experience.valid ? 'green' : 'red')}>{el.experience.value}</th>
-              <th className={clsx(el.yearlyIncome.valid ? 'green' : 'red')}>{el.yearlyIncome.value}</th>
-              <th className={clsx(el.hasChildren.valid ? 'green' : 'red')}>{el.hasChildren.value}</th>
-              <th className={clsx(el.licenseStates.valid ? 'green' : 'red')}>{el.licenseStates.value}</th>
-              <th className={clsx(el.expirationDate.valid ? 'green' : 'red')}>{el.expirationDate.value}</th>
-              <th className={clsx(el.licenseNumber.valid ? 'green' : 'red')}>{el.licenseNumber.value}</th>
-              <th>{el.dublicateWith.value}</th>
+              <th className={clsx({ 'red': !el.fullName.valid })}>{el.fullName.value}</th>
+              <th className={clsx({ 'red': !el.phone.valid })}>
+                {el.phone.value}
+              </th>
+              <th className={clsx({ 'red': !el.email.valid })}>
+                {el.email.value}
+              </th>
+              <th className={clsx({ 'red': !el.age.valid })}>
+                {el.age.value}
+              </th>
+              <th className={clsx({ 'red': !el.experience.valid })}>
+                {el.experience.value}
+              </th>
+              <th className={clsx({ 'red': !el.yearlyIncome.valid })}>
+                {el.yearlyIncome.value}
+              </th>
+              <th className={clsx({ 'red': !el.hasChildren.valid })}>
+                {el.hasChildren.value}
+              </th>
+              <th className={clsx({ 'red': !el.licenseStates.valid })}>
+                {el.licenseStates.value}
+              </th>
+              <th className={clsx({ 'red': !el.expirationDate.valid })}>
+                {el.expirationDate.value}
+              </th>
+              <th className={clsx({ 'red': !el.licenseNumber.valid })}>
+                {el.licenseNumber.value}
+              </th>
+              <th>
+                {el.dublicateWith.value}
+              </th>
             </tr>)}
           </tbody>
         </Table> : <span>Upload CSV File!</span>}
       <Modal isOpen={modal} toggle={toggleIncorrectData}>
-        Data is not correct!
+        <div>Data is not correct!</div>
       </Modal>
     </div>
   );
